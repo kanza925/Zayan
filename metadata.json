@@ -1,0 +1,7 @@
+{
+  "name": "Excellence Academy LMS",
+  "description": "A comprehensive Learning Management System and institutional website for Excellence Academy, featuring AI-powered study assistance, student portals, and administrative dashboards.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
