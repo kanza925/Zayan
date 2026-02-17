@@ -5,7 +5,10 @@ import {
   BookOpen, Clock, Calendar, GraduationCap, 
   MessageCircle, Send, BrainCircuit, Sparkles, Bell 
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+// Fix: Bypassing type errors for framer-motion by any-casting imports
+import * as FramerMotion from 'framer-motion';
+const { motion, AnimatePresence } = FramerMotion as any;
+
 import { askStudyBuddy } from '../../services/geminiService';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 

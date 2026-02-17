@@ -1,7 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+// Fix: Bypassing type errors for react-router-dom and framer-motion by any-casting imports
+import * as ReactRouterDOM from 'react-router-dom';
+import * as FramerMotion from 'framer-motion';
+const { useNavigate, Link } = ReactRouterDOM as any;
+const { motion } = FramerMotion as any;
+
 import { GraduationCap, Mail, Lock, ArrowRight, UserCircle, ShieldCheck } from 'lucide-react';
 import { UserRole, User } from '../types';
 

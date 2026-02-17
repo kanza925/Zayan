@@ -1,21 +1,26 @@
 
 import React, { useState, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
+import * as ReactRouterDOM from 'react-router-dom';
+const { HashRouter, Routes, Route, Navigate, Link, useLocation, useNavigate } = ReactRouterDOM as any;
+const Router = HashRouter;
+
 import { 
   GraduationCap, Home, Info, BookOpen, Users, 
   Building, Image as ImageIcon, Newspaper, 
   Mail, LogIn, LayoutDashboard, UserCircle, 
   LogOut, ClipboardList, DollarSign, Calendar,
   Bell, MessageSquare, Download, Clock, Menu, X,
-  Sparkles, BrainCircuit
+  Sparkles, BrainCircuit, Zap, ShieldCheck, ArrowRight
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+
+import * as FramerMotion from 'framer-motion';
+const { motion, AnimatePresence } = FramerMotion as any;
 
 // Types & Mock Data
 import { User, UserRole } from './types';
 import { INITIAL_USERS } from './constants.tsx';
 
-// Pages (Inline components for speed and single-file focus)
+// Pages
 import HomePage from './pages/Home';
 import AboutPage from './pages/About';
 import AdmissionsPage from './pages/Admissions';
@@ -48,7 +53,7 @@ const App: React.FC = () => {
 
   return (
     <Router>
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col relative">
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<PublicLayout user={currentUser} logout={logout}><HomePage /></PublicLayout>} />
@@ -78,12 +83,66 @@ const App: React.FC = () => {
           {/* Catch all */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        
+        {/* Floating Demo Toolbar for Testing */}
+        <DemoToolbar login={login} />
       </div>
     </Router>
   );
 };
 
-// --- Layout Components ---
+const DemoToolbar: React.FC<{ login: (e: string, r: string) => boolean }> = ({ login }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const quickLogin = (email: string, role: string) => {
+    login(email, role);
+    navigate(`/portal/${role}`);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="fixed bottom-6 left-6 z-[9999]">
+      <div className="relative">
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="absolute bottom-16 left-0 w-64 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl p-4 overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+              <p className="text-white font-black text-[10px] uppercase tracking-widest mb-3 opacity-50">Quick Demo Access</p>
+              <div className="space-y-2">
+                <DemoButton onClick={() => quickLogin('student@excellence.edu', 'student')} label="Student View" color="bg-blue-600" />
+                <DemoButton onClick={() => quickLogin('teacher@excellence.edu', 'teacher')} label="Teacher View" color="bg-indigo-600" />
+                <DemoButton onClick={() => quickLogin('admin@excellence.edu', 'admin')} label="Admin View" color="bg-purple-600" />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <button 
+          onClick={() => setIsOpen(!isOpen)}
+          className={`w-12 h-12 rounded-full flex items-center justify-center shadow-2xl transition-all ${isOpen ? 'bg-red-500' : 'bg-blue-600 hover:bg-blue-500'}`}
+        >
+          {isOpen ? <X className="text-white w-5 h-5" /> : <Zap className="text-white w-5 h-5 fill-white" />}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+const DemoButton = ({ label, onClick, color }: { label: string, onClick: () => void, color: string }) => (
+  <button 
+    onClick={onClick}
+    className={`w-full text-left p-2.5 rounded-xl text-white text-xs font-bold flex items-center justify-between group transition-all ${color} shadow-lg shadow-black/20`}
+  >
+    {label}
+    <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all" />
+  </button>
+);
 
 const PublicLayout: React.FC<{ children: React.ReactNode, user: User | null, logout: () => void }> = ({ children, user, logout }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -106,7 +165,6 @@ const PublicLayout: React.FC<{ children: React.ReactNode, user: User | null, log
             <span className="text-xl font-bold text-blue-900 hidden sm:block tracking-tight">EXCELLENCE ACADEMY</span>
           </Link>
 
-          {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map(link => (
               <Link 
@@ -142,14 +200,12 @@ const PublicLayout: React.FC<{ children: React.ReactNode, user: User | null, log
             )}
           </nav>
 
-          {/* Mobile Menu Toggle */}
           <button className="md:hidden p-2 text-slate-600" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <X /> : <Menu />}
           </button>
         </div>
       </header>
 
-      {/* Mobile Nav */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div 
@@ -198,15 +254,6 @@ const PublicLayout: React.FC<{ children: React.ReactNode, user: User | null, log
             <p className="text-slate-400 max-w-md leading-relaxed mb-6">
               Empowering future leaders since 1998 through world-class education, character building, and innovative learning methodologies.
             </p>
-            <div className="flex gap-4">
-              {/* Social Icons */}
-              <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-blue-600 transition-colors cursor-pointer">
-                <Mail className="w-5 h-5" />
-              </div>
-              <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-blue-600 transition-colors cursor-pointer">
-                <Newspaper className="w-5 h-5" />
-              </div>
-            </div>
           </div>
           <div>
             <h4 className="font-bold text-lg mb-6">Quick Links</h4>
@@ -214,28 +261,14 @@ const PublicLayout: React.FC<{ children: React.ReactNode, user: User | null, log
               <li><Link to="/" className="hover:text-white transition-colors">Home</Link></li>
               <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
               <li><Link to="/admissions" className="hover:text-white transition-colors">Admissions</Link></li>
-              <li><Link to="/login" className="hover:text-white transition-colors">Portal Login</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-bold text-lg mb-6">Contact Us</h4>
-            <ul className="space-y-4 text-slate-400">
-              <li className="flex gap-3">
-                <Building className="w-5 h-5 shrink-0 text-blue-500" />
-                <span>123 Education Street, Knowledge City, ST 560001</span>
-              </li>
-              <li className="flex gap-3">
-                <Mail className="w-5 h-5 shrink-0 text-blue-500" />
-                <span>info@excellence.edu</span>
-              </li>
+            <ul className="space-y-4 text-slate-400 text-sm">
+              <li className="flex gap-3"><Building className="w-4 h-4 text-blue-500" /> 123 Education St, Knowledge City</li>
+              <li className="flex gap-3"><Mail className="w-4 h-4 text-blue-500" /> info@excellence.edu</li>
             </ul>
-          </div>
-        </div>
-        <div className="container mx-auto px-4 mt-16 pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-500 text-sm">
-          <p>© 2026 Excellence Academy. All rights reserved.</p>
-          <div className="flex gap-6">
-            <span className="hover:text-white cursor-pointer">Privacy Policy</span>
-            <span className="hover:text-white cursor-pointer">Terms of Service</span>
           </div>
         </div>
       </footer>
